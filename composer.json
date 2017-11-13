@@ -1,0 +1,26 @@
+{
+    "name": "davidiq/GuestControl",
+    "type": "phpbb-extension",
+    "description": "Allows administrators to control how much guests can see",
+    "homepage": "http://phpbb.davidiq.com",
+    "version": "1.0.0",
+    "time": "2016-08-22",
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "David Colón",
+            "email": "davidiq@phpbb.com",
+            "homepage": "http://www.davidiq.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "extra": {
+        "display-name": "Guest Control",
+        "soft-require": {
+            "phpbb/phpbb": ">=3.1.9,<3.2.0@dev"
+        }
+    }
+}
