@@ -16,7 +16,6 @@ namespace davidiq\GuestControl\event;
 /**
 * @ignore
 */
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -124,7 +123,8 @@ class main_listener implements EventSubscriberInterface
                         if ($current_row_number <= 1)
                         {
                             // There's no post to show so let's go with the login box. This is an error in configuration.
-                            login_box(sprintf($this->user->lang['LOGIN_TO_READ_POST'], append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "t=$topic_id&amp;postlogin=$post_id")), $this->user->lang['LOGIN_TO_CONTINUE']);
+							$redirect_url = append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "t=$topic_id&amp;postlogin=$post_id");
+                            login_box($redirect_url, sprintf($this->user->lang('LOGIN_TO_READ_POST'), $redirect_url), $this->user->lang('LOGIN_TO_CONTINUE'));
                         }
                         // We only need the message to log in once so we clear the rest of the posts
                         $post_row = array();
@@ -133,7 +133,7 @@ class main_listener implements EventSubscriberInterface
                     else
                     {
                         // Set the post message for enforcing login
-                        $post_row['MESSAGE'] = sprintf($this->user->lang['LOGIN_TO_READ_POST'], append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "t=$topic_id&amp;postlogin=$post_id"));
+                        $post_row['MESSAGE'] = sprintf($this->user->lang('LOGIN_TO_READ_POST'), append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "t=$topic_id&amp;postlogin=$post_id"));
                         // Don't render attachments
                         $post_row['S_HAS_ATTACHMENTS'] = false;
                     }
@@ -157,7 +157,7 @@ class main_listener implements EventSubscriberInterface
             if ($post_login)
             {
                 $this->user->add_lang_ext('davidiq/GuestControl', 'guestcontrol');
-                login_box(append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "p=$post_login") . "#p$post_login", $this->user->lang['LOGIN_TO_READ_POST_FORM']);
+                login_box(append_sid("{$this->phpbb_root_path}viewtopic.$this->php_ext", "p=$post_login") . "#p$post_login", $this->user->lang('LOGIN_TO_READ_POST_FORM'));
             }
         }
     }
@@ -182,7 +182,7 @@ class main_listener implements EventSubscriberInterface
                 if ($current_page > $gc_view_pages)
                 {
                     $this->user->add_lang_ext('davidiq/GuestControl', 'guestcontrol');
-                    login_box('', $this->user->lang['LOGIN_TO_CONTINUE']);
+                    login_box('', $this->user->lang('LOGIN_TO_CONTINUE'));
                 }
                 else
                 {
@@ -210,16 +210,7 @@ class main_listener implements EventSubscriberInterface
                 return true;
             }
             // Extract the current forum ID
-            $current_forum_id = 0;
-            if (isset($event['forum_data']))
-            {
-                $current_forum_id = (int)$event['forum_data']['forum_id'];
-            }
-            else
-            {
-                $current_forum_id = (int)$event['topic_data']['forum_id'];
-            }
-
+			$current_forum_id = (int)$event[isset($event['forum_data']) ? 'forum_data' : 'topic_data']['forum_id'];
             return in_array($current_forum_id, $gc_forums);
         }
         return false;
