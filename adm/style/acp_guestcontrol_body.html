@@ -1,6 +1,9 @@
 <!-- INCLUDE overall_header.html -->
 
-<h1>{L_SETTINGS}</h1>
+<h1>{L_ACP_GLOBAL_GUESTCONTROL_SETTINGS}</h1>
+<div class="errorbox">
+	<h3>{L_ACP_GLOBAL_GUESTCONTROL_SETTINGS_WARN}</h3>
+</div>
 
 <form id="acp_board" method="post" action="{U_ACTION}">
 	<fieldset>
@@ -19,12 +22,6 @@
 			<dd><input type="number" name="gc_viewtopic_posts" id="gc_viewtopic_posts" value="{GC_VIEWTOPIC_POSTS}" /></dd>
 		</dl>
 
-		<dl>
-			<dt><label for="gc_forums">{L_ACP_GUESTCONTROL_FORUMS}{L_COLON}</label><br /><span>{L_ACP_GUESTCONTROL_FORUMS_EXPLAIN}</span></dt>
-			<dd><label><input type="checkbox" class="radio" name="all_forums" value="1"<!-- IF S_ALL_FORUMS --> checked="checked"<!-- ENDIF --> /> {L_ALL_FORUMS}</label></dd>
-			<dd><select id="gc_forums" name="gc_forums[]" multiple="multiple" size="10"<!-- IF S_ALL_FORUMS --> disabled="disabled"<!-- ENDIF -->>{S_FORUM_OPTIONS}</select></dd>
-		</dl>
-
 		<p class="submit-buttons">
 			<input class="button1" type="submit" id="submit" name="submit" value="{L_SUBMIT}" />&nbsp;
 			<input class="button2" type="reset" id="reset" name="reset" value="{L_RESET}" />
@@ -34,5 +31,4 @@
 	</fieldset>
 </form>
 
-<!-- INCLUDEJS guestcontrol.js -->
 <!-- INCLUDE overall_footer.html -->

@@ -11,7 +11,7 @@
  *
  */
 
-namespace davidiq\GuestControl\migrations;
+namespace davidiq\GuestControl\migrations\v10x;
 
 class install_acp_module extends \phpbb\db\migration\migration
 {

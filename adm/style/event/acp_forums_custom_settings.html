@@ -1,0 +1,26 @@
+<div id="forum_guest_control_options"<!-- IF not S_FORUM_POST --> style="display:none"<!-- ENDIF -->>
+    <fieldset>
+        <legend>{L_ACP_GUESTCONTROL_SETTINGS}</legend>
+        <dl>
+            <dt><label for="gc_viewforum_pages">{L_ACP_GUESTCONTROL_VIEWFORUM_PAGES}{L_COLON}</label><br /><span>{L_ACP_GUESTCONTROL_VIEWFORUM_PAGES_EXPLAIN}</span></dt>
+            <dd><input type="number" name="gc_viewforum_pages" id="gc_viewforum_pages" value="{GC_VIEWFORUM_PAGES}" /></dd>
+        </dl>
+        <dl>
+            <dt><label for="gc_viewtopic_pages">{L_ACP_GUESTCONTROL_VIEWTOPIC_PAGES}{L_COLON}</label><br /><span>{L_ACP_GUESTCONTROL_VIEWTOPIC_PAGES_EXPLAIN}</span></dt>
+            <dd><input type="number" name="gc_viewtopic_pages" id="gc_viewtopic_pages" value="{GC_VIEWTOPIC_PAGES}" /></dd>
+        </dl>
+        <dl>
+            <dt><label for="gc_viewtopic_posts">{L_ACP_GUESTCONTROL_VIEWTOPIC_POSTS}{L_COLON}</label><br /><span>{L_ACP_GUESTCONTROL_VIEWTOPIC_POSTS_EXPLAIN}</span></dt>
+            <dd><input type="number" name="gc_viewtopic_posts" id="gc_viewtopic_posts" value="{GC_VIEWTOPIC_POSTS}" /></dd>
+        </dl>
+    </fieldset>
+</div>
+
+<script type="text/javascript">
+    // <![CDATA[
+    var orig_func = display_options;
+    display_options = function(value) {
+        phpbb.toggleDisplay('forum_guest_control_options', value == {FORUM_POST} ? 1 : -1);
+        return orig_func.apply(this, arguments);
+    };
+</script>

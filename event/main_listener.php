@@ -26,18 +26,15 @@ class main_listener implements EventSubscriberInterface
 	static public function getSubscribedEvents()
 	{
 		return array(
-            'core.viewforum_get_topic_data'     => 'check_forum_topic_data',
-			'core.viewtopic_get_post_data'	    => 'check_topic_readability',
-            'core.viewtopic_modify_post_row'    => 'check_post_readability',
-            'core.viewtopic_before_f_read_check'=> 'check_for_post_login',
+            'core.viewforum_get_topic_data'     	=> 'check_forum_topic_data',
+			'core.viewtopic_get_post_data'	    	=> 'check_topic_readability',
+            'core.viewtopic_modify_post_row'    	=> 'check_post_readability',
+            'core.viewtopic_before_f_read_check'	=> 'check_for_post_login',
+			'core.acp_manage_forums_request_data'	=> 'add_gc_forum_request_data',
+			'core.acp_manage_forums_initialise_data'=> 'initialize_forum_gc_data',
+			'core.acp_manage_forums_display_form'	=> 'acp_manage_forums_display_form',
 		);
 	}
-
-	/* @var \phpbb\config\config */
-	protected $config;
-
-    /* @var \phpbb\config\db_text */
-    protected $config_text;
 
 	/* @var \phpbb\template\template */
 	protected $template;
@@ -57,18 +54,14 @@ class main_listener implements EventSubscriberInterface
 	/**
 	 * Constructor
 	 *
-	 * @param \phpbb\config\config	        $config		        Configuration object
-     * @param \phpbb\config\db_text         $config_text        Configuration text object
 	 * @param \phpbb\template\template	    $template	        Template object
      * @param \phpbb\user                   $user               User object
 	 * @param \phpbb\request\request        $request            Request object
      * @param string                        $php_ext            The PHP extension in use
      * @param string                        $phpbb_root_path    The root path for the phpBB installation
      */
-	public function __construct(\phpbb\config\config $config, \phpbb\config\db_text $config_text, \phpbb\template\template $template, \phpbb\user $user, \phpbb\request\request $request, $php_ext, $phpbb_root_path)
+	public function __construct(\phpbb\template\template $template, \phpbb\user $user, \phpbb\request\request $request, $php_ext, $phpbb_root_path)
 	{
-		$this->config = $config;
-        $this->config_text = $config_text;
 		$this->template = $template;
         $this->user = $user;
 		$this->request = $request;
@@ -143,6 +136,63 @@ class main_listener implements EventSubscriberInterface
             }
         }
     }
+
+	/**
+	 * Adds guest control request data to forum in ACP.
+	 *
+	 * @param \phpbb\event\data $event  Event object
+	 */
+    public function add_gc_forum_request_data($event)
+	{
+		$forum_data = $event['forum_data'];
+
+		if ($forum_data['forum_type'] != FORUM_POST)
+		{
+			$forum_data['gc_viewforum_pages'] = -1;
+			$forum_data['gc_viewtopic_pages'] = -1;
+			$forum_data['gc_viewtopic_posts'] = -1;
+		}
+		else
+		{
+			$forum_data['gc_viewforum_pages'] = $this->request->variable('gc_viewforum_pages', -1);
+			$forum_data['gc_viewtopic_pages'] = $this->request->variable('gc_viewtopic_pages', -1);
+			$forum_data['gc_viewtopic_posts'] = $this->request->variable('gc_viewtopic_posts', -1);
+		}
+		$event['forum_data'] = $forum_data;
+	}
+
+	/**
+	 * Initialize guest control data for forum in ACP.
+	 *
+	 * @param \phpbb\event\data $event  Event object
+	 */
+	public function initialize_forum_gc_data($event)
+	{
+		$forum_data = $event['forum_data'];
+
+		if (!isset($forum_data['forum_id']) || $forum_data['forum_type'] != FORUM_POST)
+		{
+			$forum_data['gc_viewforum_pages'] = -1;
+			$forum_data['gc_viewtopic_pages'] = -1;
+			$forum_data['gc_viewtopic_posts'] = -1;
+			$event['forum_data'] = $forum_data;
+		}
+	}
+
+	/**
+	 * Adds the template data to the manage forums form
+	 *
+	 * @param \phpbb\event\data $event  Event object
+	 */
+	public function acp_manage_forums_display_form($event)
+	{
+		$template_data = $event['template_data'];
+		$forum_data = $event['forum_data'];
+		$template_data['GC_VIEWFORUM_PAGES'] = $forum_data['gc_viewforum_pages'];
+		$template_data['GC_VIEWTOPIC_PAGES'] = $forum_data['gc_viewtopic_pages'];
+		$template_data['GC_VIEWTOPIC_POSTS'] = $forum_data['gc_viewtopic_posts'];
+		$event['template_data'] = $template_data;
+	}
 
     /**
      * Checks to see if user is trying to login to view a post

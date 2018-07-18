@@ -2,8 +2,6 @@ services:
     davidiq.GuestControl.listener:
         class: davidiq\GuestControl\event\main_listener
         arguments:
-            - '@config'
-            - '@config_text'
             - '@template'
             - '@user'
             - '@request'
