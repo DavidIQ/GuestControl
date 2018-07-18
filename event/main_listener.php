@@ -27,14 +27,19 @@ class main_listener implements EventSubscriberInterface
 	{
 		return array(
             'core.viewforum_get_topic_data'     	=> 'check_forum_topic_data',
+			
 			'core.viewtopic_get_post_data'	    	=> 'check_topic_readability',
             'core.viewtopic_modify_post_row'    	=> 'check_post_readability',
             'core.viewtopic_before_f_read_check'	=> 'check_for_post_login',
+
 			'core.acp_manage_forums_request_data'	=> 'add_gc_forum_request_data',
 			'core.acp_manage_forums_initialise_data'=> 'initialize_forum_gc_data',
 			'core.acp_manage_forums_display_form'	=> 'acp_manage_forums_display_form',
 		);
 	}
+
+	/* @var \phpbb\config\config */
+	protected $config;
 
 	/* @var \phpbb\template\template */
 	protected $template;
@@ -54,14 +59,16 @@ class main_listener implements EventSubscriberInterface
 	/**
 	 * Constructor
 	 *
+	 * @param \phpbb\config\config	        $config		        Configuration object
 	 * @param \phpbb\template\template	    $template	        Template object
      * @param \phpbb\user                   $user               User object
 	 * @param \phpbb\request\request        $request            Request object
      * @param string                        $php_ext            The PHP extension in use
      * @param string                        $phpbb_root_path    The root path for the phpBB installation
      */
-	public function __construct(\phpbb\template\template $template, \phpbb\user $user, \phpbb\request\request $request, $php_ext, $phpbb_root_path)
+	public function __construct(\phpbb\config\config $config, \phpbb\template\template $template, \phpbb\user $user, \phpbb\request\request $request, $php_ext, $phpbb_root_path)
 	{
+		$this->config = $config;
 		$this->template = $template;
         $this->user = $user;
 		$this->request = $request;
@@ -76,7 +83,8 @@ class main_listener implements EventSubscriberInterface
      */
 	public function check_forum_topic_data($event)
     {
-        $this->check_read_access((int)$this->config['gc_viewforum_pages'], $event, (int)$this->config['topics_per_page'], 'topic');
+    	$forum_data = $event['forum_data'];
+        $this->check_read_access((int)$forum_data['gc_viewforum_pages'], $event, (int)$this->config['topics_per_page'], 'topic');
     }
 
     /**
@@ -86,7 +94,8 @@ class main_listener implements EventSubscriberInterface
      */
     public function check_topic_readability($event)
     {
-        $this->check_read_access((int)$this->config['gc_viewtopic_pages'], $event, (int)$this->config['posts_per_page'], 'post');
+    	$topic_data = $event['topic_data'];
+        $this->check_read_access((int)$topic_data['gc_viewtopic_pages'], $event, (int)$this->config['posts_per_page'], 'post');
     }
 
     /**
@@ -98,7 +107,8 @@ class main_listener implements EventSubscriberInterface
     {
         if ($this->gc_is_active_for_user($event))
         {
-            $posts_to_display = (int)$this->config['gc_viewtopic_posts'];
+        	$topic_data = $event['topic_data'];
+            $posts_to_display = (int)$topic_data['gc_viewtopic_posts'];
             if ($posts_to_display >= 0)
             {
                 $start = $this->request->variable('start', 0) + 1;
@@ -253,15 +263,9 @@ class main_listener implements EventSubscriberInterface
     {
         if (!$this->user->data['is_registered'] && !$this->user->data['is_bot'])
         {
-            $gc_forums = explode(',', $this->config_text->get('gc_forums'));
-            // If we have no value for this or the first index is empty then this applies to all forums
-            if (!sizeof($gc_forums) || $gc_forums[0] == '')
-            {
-                return true;
-            }
-            // Extract the current forum ID
-			$current_forum_id = (int)$event[isset($event['forum_data']) ? 'forum_data' : 'topic_data']['forum_id'];
-            return in_array($current_forum_id, $gc_forums);
+            $data = $event[isset($event['forum_data']) ? 'forum_data' : 'topic_data'];
+            // Check if any of the GC columns have a value > -1
+            return $data['forum_type'] == FORUM_POST && ($data['gc_viewforum_pages'] > -1 || $data['gc_viewtopic_pages'] > -1 || $data['gc_viewtopic_posts'] > -1);
         }
         return false;
     }
